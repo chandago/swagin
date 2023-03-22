@@ -374,7 +374,7 @@ func (swagger *Swagger) BuildOpenAPI() {
 			Version:        swagger.Version,
 		},
 		Servers:    swagger.Servers,
-		Components: components,
+		Components: &components,
 	}
 	swagger.OpenAPI.Paths = swagger.getPaths()
 }

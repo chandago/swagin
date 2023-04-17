@@ -21,7 +21,6 @@ testcases:
       json:
         name: "test"
         token: "test"
-        optional: ""
 
 - name: delete_query_no_url_parameter
   steps:
@@ -36,7 +35,7 @@ testcases:
     response:
       statusCode: 400
       json:
-        error: "Key: 'TestQuery.Name' Error:Field validation for 'Name' failed on the 'required' tag"
+        error: "Could not validate data: Key: 'TestQueryReq.Name' Error:Field validation for 'Name' failed on the 'required' tag"
 
 - name: delete_query_no_authorization
   steps:
@@ -63,9 +62,9 @@ testcases:
     response:
       statusCode: 400
       json:
-        error: "Key: 'TestQuery.Token' Error:Field validation for 'Token' failed on the 'required' tag"
+        error: "Could not validate data: Key: 'TestQueryReq.Token' Error:Field validation for 'Token' failed on the 'required' tag"
 
-############################### GET QUERY LIST #################################
+# ############################### GET QUERY LIST #################################
 
 - name: get_query_list
   steps:
@@ -96,7 +95,7 @@ testcases:
     response:
       statusCode: 400
       json:
-        error: "Key: 'TestQueryList.Name' Error:Field validation for 'Name' failed on the 'required' tag"
+        error: "Could not validate data: Key: 'TestQueryListReq.Name' Error:Field validation for 'Name' failed on the 'required' tag"
 
 - name: get_query_list_no_authorization
   steps:
@@ -111,7 +110,7 @@ testcases:
       statusCode: 401
       body: null
 
-################################ GET QUERY ID ##################################
+# ################################ GET QUERY ID ##################################
 
 - name: get_query_id
   steps:
@@ -140,7 +139,7 @@ testcases:
     response:
       statusCode: 400
       json:
-        error: "Key: 'TestQueryPath.Token' Error:Field validation for 'Token' failed on the 'required' tag"
+        error: "Could not validate data: Key: 'TestQueryPathReq.Token' Error:Field validation for 'Token' failed on the 'required' tag"
 
 - name: get_query_id_missing_url_parameter
   steps:
@@ -154,4 +153,4 @@ testcases:
     response:
       statusCode: 400
       json:
-        error: "Key: 'TestQueryPath.Name' Error:Field validation for 'Name' failed on the 'required' tag"
+        error: "Could not validate data: Key: 'TestQueryPathReq.Name' Error:Field validation for 'Name' failed on the 'required' tag"

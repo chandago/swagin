@@ -10,9 +10,9 @@ import (
 
 type TestQueryReq struct {
 	unexported string
-	Name       string `query:"name" validate:"required" json:"name" description:"name of model" default:"test"`
-	Token      string `header:"token" validate:"required" json:"token" default:"test"`
-	Optional   string `query:"optional" json:"optional"`
+	Name       string `query:"name" validate:"required" json:"name" description:"name of model"`
+	Token      string `header:"token" validate:"required" json:"token"`
+	Optional   string `query:"optional" json:"optional,omitempty"`
 }
 
 func TestQuery(c *gin.Context, req TestQueryReq) {
@@ -22,8 +22,8 @@ func TestQuery(c *gin.Context, req TestQueryReq) {
 }
 
 type TestQueryListReq struct {
-	Name  string `query:"name" validate:"required" json:"name" description:"name of model" default:"test"`
-	Token string `header:"token" validate:"required" json:"token" default:"test"`
+	Name  string `query:"name" validate:"required" json:"name" description:"name of model"`
+	Token string `header:"token" validate:"required" json:"token"`
 }
 
 func TestQueryList(c *gin.Context, req TestQueryListReq) {
@@ -33,9 +33,9 @@ func TestQueryList(c *gin.Context, req TestQueryListReq) {
 }
 
 type TestQueryPathReq struct {
-	Name  string `query:"name" validate:"required" json:"name" description:"name of model" default:"test"`
-	ID    int    `uri:"id" validate:"required" json:"id" description:"id of model" default:"1"`
-	Token string `header:"token" validate:"required" json:"token" default:"test"`
+	Name  string `query:"name" validate:"required" json:"name" description:"name of model"`
+	ID    int    `uri:"id" validate:"required" json:"id" description:"id of model"`
+	Token string `header:"token" validate:"required" json:"token"`
 }
 
 func TestQueryPath(c *gin.Context, req TestQueryPathReq) {
@@ -43,10 +43,10 @@ func TestQueryPath(c *gin.Context, req TestQueryPathReq) {
 }
 
 type TestFormReq struct {
-	ID   int               `query:"id" validate:"required" json:"id" description:"id of model" default:"1"`
+	ID   int               `query:"id" validate:"required" json:"id" description:"id of model"`
 	Name string            `form:"name" validate:"required" json:"name" description:"name of model" default:"test"`
 	List []int             `form:"list" validate:"required" json:"list" description:"list of model"`
-	Map  map[string]string `form:"map" validate:"required" json:"map" description:"a map"`
+	Map  map[string]string `form:"map" json:"map,omitempty" description:"a map"`
 }
 
 func TestForm(c *gin.Context, req TestFormReq) {

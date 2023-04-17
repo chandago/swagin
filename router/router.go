@@ -2,11 +2,12 @@ package router
 
 import (
 	"container/list"
-	"github.com/gin-gonic/gin/binding"
-	"github.com/go-playground/validator/v10"
 	"log"
 	"net/http"
 	"reflect"
+
+	"github.com/gin-gonic/gin/binding"
+	"github.com/go-playground/validator/v10"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/copier"
@@ -53,53 +54,43 @@ func BindModel(req interface{}) gin.HandlerFunc {
 			switch c.Request.Header.Get("Content-Type") {
 			case binding.MIMEMultipartPOSTForm:
 				if err := c.ShouldBindWith(model, binding.FormMultipart); err != nil {
-					log.Panic(err)
-
+					BadRequest(c, "Could not bind request with content type multipart/form-data", err)
 				}
 			case binding.MIMEJSON:
 				if err := c.ShouldBindWith(model, binding.JSON); err != nil {
-					log.Panic(err)
-
+					BadRequest(c, "Could not bind request with content type application/json", err)
 				}
 			case binding.MIMEXML:
 				if err := c.ShouldBindWith(model, binding.XML); err != nil {
-					log.Panic(err)
-
+					BadRequest(c, "Could not bind request with content type application/xml", err)
 				}
 			case binding.MIMEPOSTForm:
 				if err := c.ShouldBindWith(model, binding.Form); err != nil {
-					log.Panic(err)
-
+					BadRequest(c, "Could not bind request with content type application/x-www-form-urlencoded", err)
 				}
 			case binding.MIMEYAML:
 				if err := c.ShouldBindWith(model, binding.YAML); err != nil {
-					log.Panic(err)
-
+					BadRequest(c, "Could not bind request with content type application/yaml", err)
 				}
 			case binding.MIMEPROTOBUF:
 				if err := c.ShouldBindWith(model, binding.ProtoBuf); err != nil {
-					log.Panic(err)
-
+					BadRequest(c, "Could not bind request with content type application/protobuf", err)
 				}
 			case binding.MIMEMSGPACK:
 				if err := c.ShouldBindWith(model, binding.MsgPack); err != nil {
-					log.Panic(err)
-
+					BadRequest(c, "Could not bind request with content type application/msgpack", err)
 				}
 			}
 		}
 		if err := c.ShouldBindUri(model); err != nil {
-			log.Panic(err)
-
+			BadRequest(c, "Could not bind URI", err)
 		}
 		defaults.SetDefaults(model)
 		if err := validate.Struct(model); err != nil {
-			log.Panic(err)
-
+			BadRequest(c, "Could not validate data", err)
 		}
 		if err := copier.Copy(req, model); err != nil {
 			log.Panic(err)
-
 		}
 		c.Next()
 	}
@@ -189,4 +180,8 @@ func (router *Router) WithExclude() *Router {
 func (router *Router) WithContentType(contentType string, contentTypeType ContentTypeType) *Router {
 	ContentType(contentType, contentTypeType)(router)
 	return router
+}
+
+func BadRequest(ctx *gin.Context, text string, err error) {
+	ctx.JSON(http.StatusBadRequest, gin.H{"error": text + ": " + err.Error()})
 }

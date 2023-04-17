@@ -12,11 +12,18 @@ testcases:
     request:
       url: "{{.URL}}/noModel"
       method: GET
+      headers:
+        authorization: foo
+        token: bar
     response:
       statusCode: 200
-      json: null
+      headers:
+        Content-Type: "application/json; charset=utf-8"
+      json:
+        authorization: foo
+        token: bar
 
-- name: no_model_missing_field
+- name: no_model_default
   steps:
   - type: tavern
     request:
@@ -24,4 +31,8 @@ testcases:
       method: GET
     response:
       statusCode: 200
-      json: null
+      headers:
+        Content-Type: "application/json; charset=utf-8"
+      json:
+        authorization: authorization
+        token: token

@@ -2,6 +2,7 @@ package main
 
 import (
 	"net"
+	"os"
 	"os/exec"
 	"testing"
 	"time"
@@ -10,7 +11,11 @@ import (
 func TestIntegration(t *testing.T) {
 	go main()
 	WaitServer()
-	out, err := exec.Command("venom", "run", "test/*.yml").CombinedOutput()
+	tests := os.Getenv("TEST_FILES")
+	if tests == "" {
+		tests = "examples/test/*.yml"
+	}
+	out, err := exec.Command("venom", "run", tests).CombinedOutput()
 	if err != nil {
 		t.Fatalf("running venom: %s", string(out))
 	}

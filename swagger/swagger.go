@@ -124,6 +124,9 @@ func (swagger *Swagger) getRequestSchemaByModel(model interface{}) *openapi3.Sch
 	if type_.Kind() == reflect.Struct {
 		for i := 0; i < type_.NumField(); i++ {
 			field := type_.Field(i)
+			if !field.IsExported() || !value_.IsValid() {
+				continue
+			}
 			value := value_.Field(i)
 			tags, err := structtag.Parse(string(field.Tag))
 			if err != nil {
@@ -262,6 +265,9 @@ func (swagger *Swagger) getParametersByModel(model interface{}) openapi3.Paramet
 	}
 	for i := 0; i < type_.NumField(); i++ {
 		field := type_.Field(i)
+		if !field.IsExported() || !value_.IsValid() {
+			continue
+		}
 		value := value_.Field(i)
 		tags, err := structtag.Parse(string(field.Tag))
 		if err != nil {

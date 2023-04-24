@@ -124,34 +124,33 @@ func (swagger *Swagger) getRequestSchemaByModel(model interface{}) *openapi3.Sch
 	if type_.Kind() == reflect.Struct {
 		for i := 0; i < type_.NumField(); i++ {
 			field := type_.Field(i)
-			if !field.IsExported() || !value_.IsValid() {
-				continue
-			}
-			value := value_.Field(i)
-			tags, err := structtag.Parse(string(field.Tag))
-			if err != nil {
-				panic(err)
-			}
-			tag, err := tags.Get(FORM)
-			if err != nil {
-				continue
-			}
-			fieldSchema := swagger.getSchemaByType(value.Interface(), true)
-			descriptionTag, err := tags.Get(DESCRIPTION)
-			if err == nil {
-				fieldSchema.Description = descriptionTag.Name
-			}
-			bindingTag, err := tags.Get(BINDING)
-			if err == nil {
-				if bindingTag.Name == "required" {
-					schema.Required = append(schema.Required, tag.Name)
+			if field.IsExported() && value_.IsValid() {
+				value := value_.Field(i)
+				tags, err := structtag.Parse(string(field.Tag))
+				if err != nil {
+					panic(err)
 				}
+				tag, err := tags.Get(FORM)
+				if err != nil {
+					continue
+				}
+				fieldSchema := swagger.getSchemaByType(value.Interface(), true)
+				descriptionTag, err := tags.Get(DESCRIPTION)
+				if err == nil {
+					fieldSchema.Description = descriptionTag.Name
+				}
+				bindingTag, err := tags.Get(BINDING)
+				if err == nil {
+					if bindingTag.Name == "required" {
+						schema.Required = append(schema.Required, tag.Name)
+					}
+				}
+				defaultTag, err := tags.Get(DEFAULT)
+				if err == nil {
+					fieldSchema.Default = defaultTag.Name
+				}
+				schema.Properties[tag.Name] = openapi3.NewSchemaRef("", fieldSchema)
 			}
-			defaultTag, err := tags.Get(DEFAULT)
-			if err == nil {
-				fieldSchema.Default = defaultTag.Name
-			}
-			schema.Properties[tag.Name] = openapi3.NewSchemaRef("", fieldSchema)
 		}
 	} else if type_.Kind() == reflect.Slice {
 		schema = openapi3.NewArraySchema()
@@ -265,57 +264,56 @@ func (swagger *Swagger) getParametersByModel(model interface{}) openapi3.Paramet
 	}
 	for i := 0; i < type_.NumField(); i++ {
 		field := type_.Field(i)
-		if !field.IsExported() || !value_.IsValid() {
-			continue
+		if field.IsExported() && value_.IsValid() {
+			value := value_.Field(i)
+			tags, err := structtag.Parse(string(field.Tag))
+			if err != nil {
+				panic(err)
+			}
+			parameter := &openapi3.Parameter{}
+			queryTag, err := tags.Get(QUERY)
+			if err == nil {
+				parameter.In = openapi3.ParameterInQuery
+				parameter.Name = queryTag.Name
+			}
+			uriTag, err := tags.Get(URI)
+			if err == nil {
+				parameter.In = openapi3.ParameterInPath
+				parameter.Name = uriTag.Name
+			}
+			headerTag, err := tags.Get(HEADER)
+			if err == nil {
+				parameter.In = openapi3.ParameterInHeader
+				parameter.Name = headerTag.Name
+			}
+			cookieTag, err := tags.Get(COOKIE)
+			if err == nil {
+				parameter.In = openapi3.ParameterInCookie
+				parameter.Name = cookieTag.Name
+			}
+			if parameter.In == "" {
+				continue
+			}
+			descriptionTag, err := tags.Get(DESCRIPTION)
+			if err == nil {
+				parameter.Description = descriptionTag.Name
+			}
+			bindingTag, err := tags.Get(BINDING)
+			if err == nil {
+				parameter.Required = bindingTag.Name == "required"
+			}
+			defaultTag, err := tags.Get(DEFAULT)
+			schema := swagger.getSchemaByType(value.Interface(), true)
+			if err == nil {
+				schema.Default = defaultTag.Name
+			}
+			parameter.Schema = &openapi3.SchemaRef{
+				Value: schema,
+			}
+			parameters = append(parameters, &openapi3.ParameterRef{
+				Value: parameter,
+			})
 		}
-		value := value_.Field(i)
-		tags, err := structtag.Parse(string(field.Tag))
-		if err != nil {
-			panic(err)
-		}
-		parameter := &openapi3.Parameter{}
-		queryTag, err := tags.Get(QUERY)
-		if err == nil {
-			parameter.In = openapi3.ParameterInQuery
-			parameter.Name = queryTag.Name
-		}
-		uriTag, err := tags.Get(URI)
-		if err == nil {
-			parameter.In = openapi3.ParameterInPath
-			parameter.Name = uriTag.Name
-		}
-		headerTag, err := tags.Get(HEADER)
-		if err == nil {
-			parameter.In = openapi3.ParameterInHeader
-			parameter.Name = headerTag.Name
-		}
-		cookieTag, err := tags.Get(COOKIE)
-		if err == nil {
-			parameter.In = openapi3.ParameterInCookie
-			parameter.Name = cookieTag.Name
-		}
-		if parameter.In == "" {
-			continue
-		}
-		descriptionTag, err := tags.Get(DESCRIPTION)
-		if err == nil {
-			parameter.Description = descriptionTag.Name
-		}
-		bindingTag, err := tags.Get(BINDING)
-		if err == nil {
-			parameter.Required = bindingTag.Name == "required"
-		}
-		defaultTag, err := tags.Get(DEFAULT)
-		schema := swagger.getSchemaByType(value.Interface(), true)
-		if err == nil {
-			schema.Default = defaultTag.Name
-		}
-		parameter.Schema = &openapi3.SchemaRef{
-			Value: schema,
-		}
-		parameters = append(parameters, &openapi3.ParameterRef{
-			Value: parameter,
-		})
 	}
 	return parameters
 }

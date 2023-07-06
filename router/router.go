@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"reflect"
+	"strings"
 
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
@@ -37,6 +38,8 @@ type Router struct {
 
 const requestKey = "request"
 
+const MIMEPROTOBUF2 = "application/protobuf"
+
 var validate = validator.New()
 
 func BindModel(model interface{}) gin.HandlerFunc {
@@ -52,7 +55,13 @@ func BindModel(model interface{}) gin.HandlerFunc {
 			log.Panic(err)
 		}
 		if c.Request.Method == http.MethodPost || c.Request.Method == http.MethodPut {
-			switch c.Request.Header.Get("Content-Type") {
+			contentType := c.Request.Header.Get("Content-Type")
+			// remove content type part after semicolon
+			parts := strings.Split(contentType, ";")
+			if len(parts) > 1 {
+				contentType = parts[0]
+			}
+			switch contentType {
 			case binding.MIMEMultipartPOSTForm:
 				if err := c.ShouldBindWith(req, binding.FormMultipart); err != nil {
 					BadRequest(c, "Could not bind request with content type multipart/form-data", err)
@@ -74,6 +83,10 @@ func BindModel(model interface{}) gin.HandlerFunc {
 					BadRequest(c, "Could not bind request with content type application/yaml", err)
 				}
 			case binding.MIMEPROTOBUF:
+				if err := c.ShouldBindWith(req, binding.ProtoBuf); err != nil {
+					BadRequest(c, "Could not bind request with content type application/x-protobuf", err)
+				}
+			case MIMEPROTOBUF2:
 				if err := c.ShouldBindWith(req, binding.ProtoBuf); err != nil {
 					BadRequest(c, "Could not bind request with content type application/protobuf", err)
 				}

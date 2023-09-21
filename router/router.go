@@ -65,43 +65,53 @@ func BindModel(model interface{}) gin.HandlerFunc {
 			case binding.MIMEMultipartPOSTForm:
 				if err := c.ShouldBindWith(req, binding.FormMultipart); err != nil {
 					BadRequest(c, "Could not bind request with content type multipart/form-data", err)
+					return
 				}
 			case binding.MIMEJSON:
 				if err := c.ShouldBindWith(req, binding.JSON); err != nil {
 					BadRequest(c, "Could not bind request with content type application/json", err)
+					return
 				}
 			case binding.MIMEXML:
 				if err := c.ShouldBindWith(req, binding.XML); err != nil {
 					BadRequest(c, "Could not bind request with content type application/xml", err)
+					return
 				}
 			case binding.MIMEPOSTForm:
 				if err := c.ShouldBindWith(req, binding.Form); err != nil {
 					BadRequest(c, "Could not bind request with content type application/x-www-form-urlencoded", err)
+					return
 				}
 			case binding.MIMEYAML:
 				if err := c.ShouldBindWith(req, binding.YAML); err != nil {
 					BadRequest(c, "Could not bind request with content type application/yaml", err)
+					return
 				}
 			case binding.MIMEPROTOBUF:
 				if err := c.ShouldBindWith(req, binding.ProtoBuf); err != nil {
 					BadRequest(c, "Could not bind request with content type application/x-protobuf", err)
+					return
 				}
 			case MIMEPROTOBUF2:
 				if err := c.ShouldBindWith(req, binding.ProtoBuf); err != nil {
 					BadRequest(c, "Could not bind request with content type application/protobuf", err)
+					return
 				}
 			case binding.MIMEMSGPACK:
 				if err := c.ShouldBindWith(req, binding.MsgPack); err != nil {
 					BadRequest(c, "Could not bind request with content type application/msgpack", err)
+					return
 				}
 			}
 		}
 		if err := c.ShouldBindUri(req); err != nil {
 			BadRequest(c, "Could not bind URI", err)
+			return
 		}
 		defaults.SetDefaults(req)
 		if err := validate.Struct(req); err != nil {
 			BadRequest(c, "Could not validate data", err)
+			return
 		}
 		c.Set(requestKey, req)
 		c.Next()

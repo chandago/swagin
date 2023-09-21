@@ -210,4 +210,5 @@ func (router *Router) WithContentType(contentType string, contentTypeType Conten
 
 func BadRequest(ctx *gin.Context, text string, err error) {
 	ctx.JSON(http.StatusBadRequest, gin.H{"error": text + ": " + err.Error()})
+	ctx.Set(requestKey, nil)
 }

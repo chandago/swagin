@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"html/template"
+	"net"
 	"net/http"
 	"os"
 	"strings"
@@ -14,6 +15,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/long2ice/swagin/router"
 	"github.com/long2ice/swagin/swagger"
+	"golang.org/x/net/netutil"
 )
 
 //go:embed templates/*
@@ -230,6 +232,39 @@ func (g *SwaGin) StartGraceful(addr ...string) (*http.Server, error) {
 	}
 	go func() {
 		if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			panic(fmt.Sprintf("ERROR starting server: %v", err))
+		}
+	}()
+	return server, nil
+}
+
+// StartGracefulWithLimit starts graceful server with a concurrent connections limit
+func (g *SwaGin) StartGracefulWithLimit(limit int, addr ...string) (*http.Server, error) {
+	g.init()
+	for _, s := range g.subApps {
+		s.init()
+	}
+	var address string
+	if len(addr) == 0 {
+		address = ":" + os.Getenv("PORT")
+		if address == ":" {
+			address = ":8080"
+		}
+	} else {
+		address = addr[0]
+	}
+	server := &http.Server{
+		Addr:    address,
+		Handler: g.Engine,
+	}
+	listener, err := net.Listen("tcp", address)
+	if err != nil {
+		return nil, err
+	}
+	listener = netutil.LimitListener(listener, limit)
+	go func() {
+		defer listener.Close()
+		if err := server.Serve(listener); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			panic(fmt.Sprintf("ERROR starting server: %v", err))
 		}
 	}()

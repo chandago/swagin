@@ -32,9 +32,12 @@ type SwaGin struct {
 	afterInitFunc  func()
 }
 
-func New(swagger *swagger.Swagger) *SwaGin {
+func New(swagger *swagger.Swagger, recovery ...gin.HandlerFunc) *SwaGin {
 	engine := gin.New()
-	engine.Use(gin.Recovery())
+	if len(recovery) == 0 {
+		recovery = []gin.HandlerFunc{gin.Recovery()}
+	}
+	engine.Use(recovery[0])
 	f := &SwaGin{
 		Engine:  engine,
 		Swagger: swagger,

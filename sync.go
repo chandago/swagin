@@ -16,6 +16,12 @@ func NewLimitedInt(limit int) SyncedLimitedInt {
 
 // Incr limited int or receive false
 func (sli *SyncedLimitedInt) Incr() bool {
+	sli.mutex.RLock()
+	if sli.value >= sli.limit {
+		sli.mutex.RUnlock()
+		return false
+	}
+	sli.mutex.RUnlock()
 	sli.mutex.Lock()
 	defer sli.mutex.Unlock()
 	if sli.value < sli.limit {

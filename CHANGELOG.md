@@ -1,7 +1,5 @@
 # ChangeLog
 
-## 0.1
+## 2025-01-10
 
-### 0.1.0
-
-- Release first version.
+- Ajout d'un fichier CHANGELOG.md dans le projet
